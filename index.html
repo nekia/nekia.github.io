@@ -1,50 +1,176 @@
 <!doctype html>
 <html>
-	<head>
-		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-		<title>reveal.js</title>
+	<title>reveal.js</title>
 
-		<link rel="stylesheet" href="css/reveal.css">
-		<link rel="stylesheet" href="css/theme/black.css">
+	<link rel="stylesheet" href="css/reveal.css">
+	<link rel="stylesheet" href="css/theme/moon.css">
 
-		<!-- Theme used for syntax highlighting of code -->
-		<link rel="stylesheet" href="lib/css/zenburn.css">
+	<!-- Theme used for syntax highlighting of code -->
+	<link rel="stylesheet" href="lib/css/zenburn.css">
 
-		<!-- Printing and PDF exports -->
-		<script>
-			var link = document.createElement( 'link' );
-			link.rel = 'stylesheet';
-			link.type = 'text/css';
-			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
-			document.getElementsByTagName( 'head' )[0].appendChild( link );
-		</script>
-	</head>
-	<body>
-		<div class="reveal">
-			<div class="slides">
-				<section>Slide 1</section>
-				<section>Slide 2</section>
-			</div>
-		</div>
+	<!-- Printing and PDF exports -->
+	<script>
+	  var link = document.createElement( 'link' );
+	  link.rel = 'stylesheet';
+	  link.type = 'text/css';
+	  link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+	  document.getElementsByTagName( 'head' )[0].appendChild( link );
+	</script>
+    <style type="text/css">
+      .reveal h1,
+      .reveal h2,
+      .reveal h3,
+      .reveal h4,
+      .reveal h5,
+      .reveal h6 {
+        text-transform: none;
+      }
+    </style>
+  </head>
+  <body>
+	<div class="reveal">
+	  <div class="slides">
+        <section data-markdown
+                 data-separator="\n---\n$"
+                 data-separator-vertical="\n--\n$">
+          <script type="text/template">
+            
+# 10分でIoT !
+### AWS IoT使った感想
 
-		<script src="lib/js/head.min.js"></script>
-		<script src="js/reveal.js"></script>
+---
 
-		<script>
-			// More info https://github.com/hakimel/reveal.js#configuration
-			Reveal.initialize({
-				history: true,
+## 用意するもの
+- AWSアカウント
+- Things
+    - ラズパイ上のLED x 2
+    - タクトスイッチ x 1
 
-				// More info https://github.com/hakimel/reveal.js#dependencies
-				dependencies: [
-					{ src: 'plugin/markdown/marked.js' },
-					{ src: 'plugin/markdown/markdown.js' },
-					{ src: 'plugin/notes/notes.js', async: true },
-					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
-				]
-			});
-		</script>
-	</body>
+--
+
+### ラズパイ
+- 粗いですがこんな感じ
+
+![ラズパイ](images/raspberry.png)
+
+--
+
+### ラズパイ準備：Pythonスクリプト
+- 事前に以下のPythonスクリプトを書いておく（数行程度）
+    - LEDを色指定して明滅させるスクリプト
+    - タクトスイッチの押下状態を検出するスクリプト
+
+---
+
+ではスタート！
+
+---
+
+### AWS IoT コンソールにログイン
+
+![IoTスタート](images/aws_iot_start.png)
+
+--
+
+### デバイス接続ウィザード開始
+
+![ウィザード](images/aws_iot_connect.png)
+
+--
+
+### プラットフォームと言語を選択
+
+![環境選択](images/aws_iot_select_platform.png)
+
+--
+
+### デバイス(Things)の登録
+- ラズパイ上のLED用エントリをAWS IoT上に登録する
+
+![デバイス登録](images/aws_iot_register.png)
+
+--
+
+### 通信用キット一式をダウンロード
+- 証明書やRootCA、鍵等を同梱したキット一式がダウンロードできる
+
+![ダウンロード](images/aws_iot_download.png)
+
+--
+
+### いざ通信テスト！
+- MQTTによるPublish/Subscribeの通信テストをする
+
+![通信テスト](images/aws_iot_test.png)
+
+--
+
+### 祝！開通
+
+![通信テスト](images/aws_iot_congratulation.png)
+
+---
+
+### コンソールからのデバイス管理
+- 簡易ではありますがコンソールから登録済みデバイスの管理が可能
+    - MQTTのPub/Sub
+    - 配布した証明書毎に権限設定 等
+
+![コンソール](images/aws_iot_console.png)
+
+--
+
+### 実際にコンソールからいじった様子 1
+- Publish(LEDを赤点灯)
+
+![publish](images/aws_iot_console_raspberry1.png)
+
+--
+
+### 実際にコンソールからいじった様子 2
+- Subscribe(ボタン状態読み取り)
+
+![subscribe](images/aws_iot_console_raspberry2.png)
+
+---
+
+## 使用感
+- AWS IoTのWeb UIが最近刷新されて手間が簡素化されていて良い
+- 通信用キットをテンプレートにカスタマイズが非常に用意でした
+
+- 無数のデバイスが存在する環境ではアプリの発行手続が非常に面倒かも
+    - デバイスと証明書を1対1にせず、制御ポリシー単位で証明書を発行すれば良さそう
+        - デバイス単位のアクセスはMQTTのトピックでどうにでもなりそうなので
+
+---
+
+おしまい
+
+          </script>
+        </section>
+	  </div>
+	</div>
+
+	<script src="lib/js/head.min.js"></script>
+	<script src="js/reveal.js"></script>
+
+	<script>
+	  // More info https://github.com/hakimel/reveal.js#configuration
+	  Reveal.initialize({
+	  history: true,
+
+	  // More info https://github.com/hakimel/reveal.js#dependencies
+	  dependencies: [
+	  { src: 'plugin/markdown/marked.js' },
+	  { src: 'plugin/markdown/markdown.js' },
+	  { src: 'plugin/notes/notes.js', async: true },
+	  { src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
+	  ]
+	  });
+	</script>
+  </body>
 </html>
